@@ -5,19 +5,23 @@ from django.contrib.auth import authenticate
 
 class SignUpForm(forms.Form):
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={
-        'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите имя'}))
+        'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите логин'}))
     password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': "form-control", 'id': "inputPassword", 'placeholder': 'Введите пароль'}))
     repeat_password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
         'class': "form-control", 'id': "ReInputPassword", 'placeholder': 'Повторите пароль'}))
 
-    # Валидация форм на совпадение
+    # Валидация форм на совпадение логинов и паролей
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
         password = self.cleaned_data['password']
         confirm_password = self.cleaned_data['repeat_password']
         if password != confirm_password:
             raise forms.ValidationError("Пароли не совпадают")
+        username = self.cleaned_data['username']
+        duplicate_user = User.objects.filter(username__iexact=username)
+        if duplicate_user.exists():
+            raise forms.ValidationError("Пользователь с таким именем уже существует")
 
     # Сохранение данных формы в базу данных
     def save(self):
@@ -32,6 +36,6 @@ class SignUpForm(forms.Form):
 
 class SignInForm(forms.Form):
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={
-            'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите имя'}))
+            'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите логин'}))
     password = forms.CharField( required=True, widget=forms.PasswordInput(attrs={
             'class': "form-control mt-2", 'id': "inputPassword", 'placeholder': 'Введите пароль'}))
