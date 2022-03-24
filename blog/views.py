@@ -7,6 +7,7 @@ from django.contrib.auth import login, authenticate
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.mail import send_mail, BadHeaderError
 from django.db.models import Q
+from taggit.models import Tag
 
 
 class MainView(View):
@@ -21,7 +22,10 @@ class MainView(View):
 class PostDetailView(View):
     def get(self, request, slug, *args, **kwargs):
         post = get_object_or_404(Post, url=slug)
-        return render(request, 'blog/post.html', context={'post': post})
+        common_tags = Post.tag.most_common()
+        last_posts = Post.objects.all().order_by('-id')[:5]
+        return render(request, 'blog/post.html', context={
+            'post': post, 'common_tags': common_tags, 'last_posts': last_posts})
 
 
 class SignUpView(View):
@@ -107,6 +111,12 @@ class SearchResultsView(View):
         paginator = Paginator(results, 6)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        return render(request, 'blog/search.html', context={
-            'title': 'Поиск', 'results': page_obj, 'count': paginator.count
-        })
+        return render(request, 'blog/search.html', context={'title': 'Поиск', 'results': page_obj, 'count': paginator.count})
+
+
+class TagView(View):
+    def get(self, request, slug, *args, **kwargs):
+        tag = get_object_or_404(Tag, slug=slug)
+        posts = Post.objects.filter(tag=tag)
+        common_tags = Post.tag.most_common()
+        return render(request, 'blog/tag.html', context={'title': f'#ТЕГ {tag}', 'posts': posts, 'common_tags': common_tags})
