@@ -3,20 +3,23 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
 
-class SigUpForm(forms.Form):
+class SignUpForm(forms.Form):
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={
-            'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите имя'}))
+        'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите имя'}))
     password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
-            'class': "form-control", 'id': "inputPassword", 'placeholder': 'Введите пароль'}))
+        'class': "form-control", 'id': "inputPassword", 'placeholder': 'Введите пароль'}))
     repeat_password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={
-            'class': "form-control", 'id': "ReInputPassword", 'placeholder': 'Повторите пароль'}))
+        'class': "form-control", 'id': "ReInputPassword", 'placeholder': 'Повторите пароль'}))
 
+    # Валидация форм на совпадение
     def clean(self):
+        cleaned_data = super(SignUpForm, self).clean()
         password = self.cleaned_data['password']
         confirm_password = self.cleaned_data['repeat_password']
         if password != confirm_password:
             raise forms.ValidationError("Пароли не совпадают")
 
+    # Сохранение данных формы в базу данных
     def save(self):
         user = User.objects.create_user(
             username=self.cleaned_data['username'],
@@ -25,3 +28,10 @@ class SigUpForm(forms.Form):
         user.save()
         auth = authenticate(**self.cleaned_data)
         return auth
+
+
+class SignInForm(forms.Form):
+    username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={
+            'class': "form-control", 'id': "inputUsername", 'placeholder': 'Введите имя'}))
+    password = forms.CharField( required=True, widget=forms.PasswordInput(attrs={
+            'class': "form-control mt-2", 'id': "inputPassword", 'placeholder': 'Введите пароль'}))
