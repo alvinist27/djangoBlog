@@ -50,3 +50,7 @@ class FeedBackForm(forms.Form):
         'class': 'form-control', 'id': 'subject', 'placeholder': "Тема"}))
     message = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control md-textarea',
         'id': 'message', 'rows': 2, 'placeholder': "Ваше сообщение"}))
+
+
+class SearchForm(forms.Form):
+    pass
